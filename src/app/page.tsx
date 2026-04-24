@@ -524,28 +524,16 @@ function StepForm({ ctx, onResult, onBack }: { ctx: CtxData; onResult: (r: StepR
 Tema: ${tema || "eventos del capítulo y su contexto"}
 ${extra ? `Instrucciones adicionales: ${extra}` : ""}
 
-Devolvé SOLO un objeto JSON (sin markdown) con esta estructura EXACTA:
-{
-  "tipo": "cronologia",
-  "titulo": "Línea de tiempo: ${ctx.libro} ${ctx.cap}",
-  "linea_capitulo": {
-    "titulo": "Eventos del Capítulo ${ctx.cap}",
-    "eventos": [
-      {"posicion": 1, "titulo": "Nombre del evento", "descripcion": "Descripción breve del evento", "versiculos": "1-3"},
-      {"posicion": 2, "titulo": "Otro evento", "descripcion": "Descripción", "versiculos": "4-7"}
-    ]
-  },
-  "linea_libro": {
-    "titulo": "Panorama de ${ctx.libro}",
-    "capitulo_marcado": ${ctx.cap},
-    "total_capitulos": ${LIBROS_CAPITULOS[ctx.libro] || 1},
-    "eventos": [
-      {"capitulo_inicio": 1, "capitulo_fin": 5, "titulo": "Sección del libro", "descripcion": "Resumen de esta sección"},
-      {"capitulo_inicio": 6, "capitulo_fin": 10, "titulo": "Otra sección", "descripcion": "Resumen"}
-    ]
-  },
-  "contenido_html": "[HTML completo con ambas líneas de tiempo visuales. La línea del capítulo debe ser vertical con puntos dorados. La línea del libro debe ser HORIZONTAL con una barra que marca dónde está el capítulo ${ctx.cap}. Usá clases CSS: contenedor-blog, titulo-entrada, cita-versiculo, caja-linguistica, apendice-nota]"
-}`;
+IMPORTANTE: Devolvé SOLO el objeto JSON puro, SIN markdown, SIN \`\`\`json, SIN \`\`\`, SIN texto antes o después.
+
+Estructura EXACTA:
+{"tipo":"cronologia","titulo":"Línea de tiempo: ${ctx.libro} ${ctx.cap}","linea_capitulo":{"titulo":"Eventos del Capítulo ${ctx.cap}","eventos":[{"posicion":1,"titulo":"Nombre del evento","descripcion":"Descripción breve","versiculos":"1-3"}]},"linea_libro":{"titulo":"Panorama de ${ctx.libro}","capitulo_marcado":${ctx.cap},"total_capitulos":${LIBROS_CAPITULOS[ctx.libro] || 1},"eventos":[{"capitulo_inicio":1,"capitulo_fin":5,"titulo":"Sección del libro","descripcion":"Resumen"}]},"contenido_html":"[HTML completo con ambas líneas de tiempo visuales. La línea del capítulo debe ser vertical con puntos dorados. La línea del libro debe ser HORIZONTAL con una barra que marca dónde está el capítulo ${ctx.cap}. Usá comillas simples para atributos HTML. Usá clases CSS: contenedor-blog, titulo-entrada, cita-versiculo, caja-linguistica, apendice-nota]"}
+
+Reglas:
+- No uses trailing commas
+- Cerrá todas las llaves y corchetes
+- No dejes el JSON incompleto
+- En contenido_html usá comillas simples para atributos HTML (style='color:red' NO style="color:red")`;
     } else if (tipo === "quiz") {
       prompt = `Generá un cuestionario bíblico en JSON para ${ctx.libro} capítulo ${ctx.cap}.
 Título: "${titulo || `¿Cuánto entendiste de ${ctx.libro} ${ctx.cap}?`}"
@@ -553,22 +541,17 @@ Tema/contexto: ${tema || "el capítulo completo"}
 Cantidad de preguntas: ${numPreguntas}
 ${extra ? `Instrucciones adicionales: ${extra}` : ""}
 
-Devolvé SOLO un objeto JSON con esta estructura exacta (sin markdown ni explicaciones):
-{
-  "tipo": "quiz",
-  "titulo": "...",
-  "preguntas": [
-    {
-      "pregunta": "texto de la pregunta",
-      "opciones": [
-        {"texto": "opción A", "correcta": false},
-        {"texto": "opción B", "correcta": true},
-        {"texto": "opción C", "correcta": false},
-        {"texto": "opción D", "correcta": false}
-      ]
-    }
-  ]
-}`;
+IMPORTANTE: Devolvé SOLO el objeto JSON puro, SIN markdown, SIN \`\`\`json, SIN \`\`\`, SIN texto antes o después. El JSON debe ser válido y estar completo.
+
+Estructura exacta:
+{"tipo":"quiz","titulo":"...","preguntas":[{"pregunta":"texto de la pregunta","opciones":[{"texto":"opción A","correcta":false},{"texto":"opción B","correcta":true},{"texto":"opción C","correcta":false},{"texto":"opción D","correcta":false}]}]}
+
+Reglas:
+- Cada pregunta debe tener exactamente 4 opciones
+- Solo una opción debe tener "correcta": true, las demás false
+- No uses trailing commas
+- Cerrá todas las llaves y corchetes
+- No dejes el JSON incompleto`;
     } else if (tipo === "personaje") {
       prompt = `Generá una ficha de personaje bíblico en HTML para ${ctx.libro} capítulo ${ctx.cap}.
 Personaje(s): ${personajes || titulo}
@@ -638,28 +621,70 @@ Devolvé SOLO un objeto JSON (sin markdown):
     }
 
     try {
+      // Más tokens para tipos que generan HTML extenso
+      const needsMoreTokens = ["cronologia", "personaje", "glosario"].includes(tipo);
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, max_tokens: needsMoreTokens ? 16000 : 8000 }),
       });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
       const text = data.text || "";
 
-      // Parseo robusto
-      let clean = text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "");
+      // Parseo robusto de JSON
+      let clean = text.trim();
       let parsed: Record<string, unknown> | null = null;
+      let parseError = "";
 
-      try { const m = clean.match(/\{[\s\S]*\}/); if (m) parsed = JSON.parse(m[0]); } catch (_) { /* */ }
-      if (!parsed) {
-        try {
-          const m2 = clean.match(/\{[\s\S]*\}/);
-          if (m2) parsed = JSON.parse(m2[0]);
-        } catch (_) { /* */ }
+      // 1) Limpiar fences de markdown (```json ... ``` o ``` ... ```)
+      clean = clean.replace(/^\s*```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "");
+      // 2) También limpiar si el fence está sin salto de línea
+      clean = clean.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+
+      // 3) Intentar parseo directo
+      try { parsed = JSON.parse(clean); } catch (e1) {
+        parseError = e1 instanceof Error ? e1.message : String(e1);
+
+        // 4) Extraer el primer objeto JSON válido con balanceo de llaves
+        const firstBrace = clean.indexOf("{");
+        if (firstBrace !== -1) {
+          let depth = 0;
+          let inStr = false;
+          let esc = false;
+          let endIdx = -1;
+          for (let i = firstBrace; i < clean.length; i++) {
+            const ch = clean[i];
+            if (esc) { esc = false; continue; }
+            if (ch === "\\") { esc = true; continue; }
+            if (ch === '"' && !esc) { inStr = !inStr; continue; }
+            if (inStr) continue;
+            if (ch === "{") depth++;
+            if (ch === "}") { depth--; if (depth === 0) { endIdx = i; break; } }
+          }
+          if (endIdx !== -1) {
+            const candidate = clean.substring(firstBrace, endIdx + 1);
+            try { parsed = JSON.parse(candidate); } catch (e2) {
+              parseError += " | " + (e2 instanceof Error ? e2.message : String(e2));
+
+              // 5) Último recurso: limpiar trailing commas y reintentar
+              const noTrailing = candidate.replace(/,\s*([\]}])/g, "$1");
+              try { parsed = JSON.parse(noTrailing); } catch (e3) {
+                parseError += " | " + (e3 instanceof Error ? e3.message : String(e3));
+              }
+            }
+          }
+        }
       }
-      if (!parsed) throw new Error("No se pudo parsear la respuesta de IA. Intentá de nuevo.");
+
+      if (!parsed) {
+        // Mostrar un fragmento de lo que devolvió la IA para que el usuario vea el problema
+        const preview = clean.length > 300 ? clean.substring(0, 300) + "..." : clean;
+        console.error("Parseo fallido. Respuesta IA (primeros 300 chars):", preview);
+        console.error("Errores de parseo:", parseError);
+        throw new Error(`No se pudo parsear la respuesta de IA. La IA devolvió: "${preview}". Intentá de nuevo.`);
+      }
 
       setGenerado(parsed);
       setIteracion(i => i + 1);

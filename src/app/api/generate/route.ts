@@ -3,7 +3,7 @@ import ZAI from "z-ai-web-dev-sdk";
 
 export async function POST(request: Request) {
   try {
-    const { prompt } = await request.json();
+    const { prompt, max_tokens } = await request.json();
 
     if (!prompt) {
       return NextResponse.json(
@@ -19,17 +19,24 @@ export async function POST(request: Request) {
         {
           role: "system",
           content:
-            "Sos un asistente especializado en recursos bíblicos educativos. Respondés SIEMPRE con JSON válido puro. IMPORTANTE: en el contenido_html usá SIEMPRE comillas simples para atributos HTML (ej: style='color:red' NO style=\"color:red\"). Sin markdown, sin explicaciones. Solo el JSON.",
+            "Sos un asistente especializado en recursos bíblicos educativos. Respondés SIEMPRE con JSON válido puro, sin markdown, sin explicaciones, sin comentarios. Solo el objeto JSON. REGLAS: 1) NO uses ```json ni ``` fences. 2) NO agregues texto antes ni después del JSON. 3) En contenido_html usá SIEMPRE comillas simples para atributos HTML (ej: style='color:red' NO style=\"color:red\"). 4) No dejes trailing commas. 5) Asegurate de cerrar todas las llaves y corchetes correctamente.",
         },
         {
           role: "user",
           content: prompt,
         },
       ],
-      max_tokens: 4000,
+      max_tokens: max_tokens || 8000,
     });
 
     const text = completion.choices?.[0]?.message?.content || "";
+
+    if (!text) {
+      return NextResponse.json(
+        { error: "La IA no devolvió contenido. Intentá de nuevo." },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json({ text });
   } catch (error: unknown) {
