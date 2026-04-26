@@ -519,21 +519,82 @@ function StepForm({ ctx, onResult, onBack }: { ctx: CtxData; onResult: (r: StepR
 
     let prompt = "";
 
-    if (tipo === "cronologia") {
-      prompt = `Generá una línea de tiempo bíblica COMPLETA en JSON para ${ctx.libro} capítulo ${ctx.cap}.
+if (tipo === "cronologia") {
+  prompt = `Generá una línea de tiempo bíblica COMPLETA en JSON para ${ctx.libro} capítulo ${ctx.cap}.
 Tema: ${tema || "eventos del capítulo y su contexto"}
-${extra ? `Instrucciones adicionales: ${extra}` : ""}
-
 IMPORTANTE: Devolvé SOLO el objeto JSON puro, SIN markdown, SIN \`\`\`json, SIN \`\`\`, SIN texto antes o después.
 
-Estructura EXACTA:
-{"tipo":"cronologia","titulo":"Línea de tiempo: ${ctx.libro} ${ctx.cap}","linea_capitulo":{"titulo":"Eventos del Capítulo ${ctx.cap}","eventos":[{"posicion":1,"titulo":"Nombre del evento","descripcion":"Descripción breve","versiculos":"1-3"}]},"linea_libro":{"titulo":"Panorama de ${ctx.libro}","capitulo_marcado":${ctx.cap},"total_capitulos":${LIBROS_CAPITULOS[ctx.libro] || 1},"eventos":[{"capitulo_inicio":1,"capitulo_fin":5,"titulo":"Sección del libro","descripcion":"Resumen"}]},"contenido_html":"[HTML completo con ambas líneas de tiempo visuales. La línea del capítulo debe ser vertical con puntos dorados. La línea del libro debe ser HORIZONTAL con una barra que marca dónde está el capítulo ${ctx.cap}. Usá comillas simples para atributos HTML. Usá clases CSS: contenedor-blog, titulo-entrada, cita-versiculo, caja-linguistica, apendice-nota]"}
+{
+  "tipo": "cronologia",
+  "titulo": "Línea de tiempo: ${ctx.libro} ${ctx.cap}",
+  "contenido_html": "<div style='font-family: Georgia, serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 40px 20px; border-radius: 16px; min-height: 600px;'> ... </div>"
+}
 
-Reglas:
-- No uses trailing commas
-- Cerrá todas las llaves y corchetes
-- No dejes el JSON incompleto
-- En contenido_html usá comillas simples para atributos HTML (style='color:red' NO style="color:red")`;
+El HTML debe estar compuesto por dos partes, una debajo de la otra, dentro del mismo div contenedor:
+
+1. **Línea vertical del capítulo** (estilo oscuro con puntos dorados). Cada evento debe mostrar:
+   - Rango de versículos (ej: 1‑2).
+   - Título breve.
+   - Descripción clara y fiel al texto bíblico.
+   (Los eventos deben cubrir TODO el capítulo, sin dejar versículos importantes sin representar).
+
+2. **Barra horizontal del libro** (panorama de Génesis, caps 1‑50). Debe mostrar:
+   - Segmentos con grupos de capítulos (Creación y caída, Arca y dispersión, Llamado a Abraham y pactos, Isaac Jacob Esaú, José y fin de Génesis).
+   - El segmento donde se encuentra el capítulo ${ctx.cap} debe quedar **resaltado con la clase "activo"** y un marcador dorado indicando "Cap ${ctx.cap}".
+   - Colores y estilos exactamente iguales al ejemplo que te doy, adaptando los contenidos al libro de Génesis.
+
+**IMPORTANTE:** El HTML final debe usar **exclusivamente estilos en línea**, sin clases CSS externas, y debe ser idéntico en estructura visual a este modelo (sustituye cada evento y versículo según el capítulo ${ctx.cap}):
+
+--- MODELO EXACTO DEL HTML QUE DEBES GENERAR ---
+<div style="font-family: Georgia, serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 40px 20px; border-radius: 16px; min-height: 600px;">
+  <h2 style="text-align: center; color: #f0c040; font-size: 1.6em; margin-bottom: 8px; text-shadow: 0 0 10px rgba(240,192,64,0.5);">⏳ Línea de Tiempo</h2>
+  <h3 style="text-align: center; color: #e8d5a3; font-size: 1.1em; margin-bottom: 40px; font-weight: normal; letter-spacing: 1px;">${ctx.libro} Capítulo ${ctx.cap}</h3>
+
+  <!-- LÍNEA VERTICAL DEL CAPÍTULO -->
+  <div style="position: relative; max-width: 680px; margin: 0 auto 50px auto;">
+    <div style="position: absolute; left: 28px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, #f0c040, #c8962a, #f0c040); border-radius: 2px;"></div>
+    <!-- Repetir este bloque por cada evento del capítulo -->
+    <div style="position: relative; margin-bottom: 36px; padding-left: 72px;">
+      <div style="position: absolute; left: 14px; top: 8px; width: 30px; height: 30px; background: radial-gradient(circle, #fff8c0, #f0c040); border-radius: 50%; border: 3px solid #c8962a; box-shadow: 0 0 14px rgba(240,192,64,0.8); display: flex; align-items: center; justify-content: center;">
+        <span style="font-size: 0.75em;">✦</span>
+      </div>
+      <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(240,192,64,0.3); border-left: 4px solid #f0c040; border-radius: 10px; padding: 16px 18px;">
+        <span style="display: inline-block; background: #f0c040; color: #1a1a2e; font-size: 0.7em; font-weight: bold; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; letter-spacing: 1px;">VERSÍCULOS X‑Y</span>
+        <h4 style="color: #f0c040; margin: 0 0 6px 0; font-size: 1.05em;">Título del evento</h4>
+        <p style="color: #d4c5a0; margin: 0; font-size: 0.92em; line-height: 1.6;">Descripción precisa del evento.</p>
+      </div>
+    </div>
+    <!-- Fin del bloque, se repite para cada evento... -->
+  </div>
+
+  <!-- BARRA HORIZONTAL DEL LIBRO (GÉNESIS) -->
+  <div style="max-width: 720px; margin: 0 auto;">
+    <h3 style="color: #e8d5a3; font-size: 1.1em; margin-bottom: 20px; font-weight: normal; text-align: center;">Panorama de Génesis</h3>
+    <div style="position: relative; width: 100%; height: 64px; background: rgba(255,255,255,0.04); border-radius: 12px; overflow: visible; display: flex; align-items: stretch;">
+      <div style="position: absolute; left: 0%; top: 8px; height: 48px; width: 10%; background: rgba(240,192,64,0.15); border: 1px solid rgba(240,192,64,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; padding: 0 4px; color: #c8962a; text-align: center; line-height: 1.2;">Creación<br/>1‑5</div>
+      <div style="position: absolute; left: 10%; top: 8px; height: 48px; width: 10%; background: rgba(240,192,64,0.15); border: 1px solid rgba(240,192,64,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; padding: 0 4px; color: #c8962a; text-align: center; line-height: 1.2;">Arca<br/>6‑11</div>
+      <div style="position: absolute; left: 20%; top: 0px; height: 64px; width: 16%; background: linear-gradient(135deg, rgba(240,192,64,0.4), rgba(200,150,42,0.4)); border: 2px solid #f0c040; border-radius: 8px; box-shadow: 0 0 20px rgba(240,192,64,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.65em; font-weight: bold; padding: 0 4px; color: #fff; text-align: center; line-height: 1.2;">Llamado a Abraham<br/>12‑25</div>
+      <div style="position: absolute; left: 36%; top: 8px; height: 48px; width: 12%; background: rgba(240,192,64,0.15); border: 1px solid rgba(240,192,64,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; padding: 0 4px; color: #c8962a; text-align: center; line-height: 1.2;">Isaac Jacob Esaú<br/>26‑36</div>
+      <div style="position: absolute; left: 48%; top: 8px; height: 48px; width: 12%; background: rgba(240,192,64,0.15); border: 1px solid rgba(240,192,64,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; padding: 0 4px; color: #c8962a; text-align: center; line-height: 1.2;">José<br/>37‑50</div>
+      <!-- Marcador del capítulo actual -->
+      <div style="position: absolute; left: 28%; top: -16px; transform: translateX(-50%); background: #f0c040; color: #1a1a2e; font-weight: bold; font-size: 0.68em; padding: 2px 10px; border-radius: 12px; white-space: nowrap;">Cap ${ctx.cap}</div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(240,192,64,0.2);">
+    <p style="color: rgba(212,197,160,0.6); font-size: 0.78em; font-style: italic;">"Versículo clave del capítulo"</p>
+  </div>
+</div>
+--- FIN DEL MODELO ---
+
+Reglas estrictas:
+- NO uses markdown ni rodees el JSON con comillas triples.
+- Todo el HTML debe estar dentro del string "contenido_html", válido y escapado correctamente.
+- Adaptá los eventos de la línea vertical al contenido real de ${ctx.libro} ${ctx.cap} (leé el capítulo y dividilo en 4‑7 eventos importantes según los versículos).
+- La barra del libro debe mostrar exactamente los cinco segmentos de Génesis que figuran en el modelo, y el marcador "Cap ${ctx.cap}" debe posicionarse sobre el segmento correcto.
+`;
+}
+   
     } else if (tipo === "quiz") {
       prompt = `Generá un cuestionario bíblico en JSON para ${ctx.libro} capítulo ${ctx.cap}.
 Título: "${titulo || `¿Cuánto entendiste de ${ctx.libro} ${ctx.cap}?`}"
