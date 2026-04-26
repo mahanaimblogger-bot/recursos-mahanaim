@@ -521,80 +521,189 @@ function StepForm({ ctx, onResult, onBack }: { ctx: CtxData; onResult: (r: StepR
 
 if (tipo === "cronologia") {
   prompt = `Generá una línea de tiempo bíblica COMPLETA en JSON para ${ctx.libro} capítulo ${ctx.cap}.
-Tema: ${tema || "eventos del capítulo y su contexto"}
+Tema: ${tema || "eventos del capítulo y su contexto histórico-canónico"}
+
 IMPORTANTE: Devolvé SOLO el objeto JSON puro, SIN markdown, SIN \`\`\`json, SIN \`\`\`, SIN texto antes o después.
 
 {
   "tipo": "cronologia",
   "titulo": "Línea de tiempo: ${ctx.libro} ${ctx.cap}",
-  "contenido_html": "<div style='font-family: Georgia, serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 40px 20px; border-radius: 16px; min-height: 600px;'> ... </div>"
+  "contenido_html": "...HTML completo aquí..."
 }
 
-El HTML debe estar compuesto por dos partes, una debajo de la otra, dentro del mismo div contenedor:
+════════════════════════════════════════
+ARQUITECTURA VISUAL (dos secciones en orden)
+════════════════════════════════════════
 
-1. **Línea vertical del capítulo** (estilo oscuro con puntos dorados). Cada evento debe mostrar:
-   - Rango de versículos (ej: 1‑2).
-   - Título breve.
-   - Descripción clara y fiel al texto bíblico.
-   (Los eventos deben cubrir TODO el capítulo, sin dejar versículos importantes sin representar).
+SECCIÓN 1 — PANORAMA DEL LIBRO (encabezado contextual, va ARRIBA)
+SECCIÓN 2 — ZIGZAG DEL CAPÍTULO (desarrollo detallado, va ABAJO)
 
-2. **Barra horizontal del libro** (panorama de Génesis, caps 1‑50). Debe mostrar:
-   - Segmentos con grupos de capítulos (Creación y caída, Arca y dispersión, Llamado a Abraham y pactos, Isaac Jacob Esaú, José y fin de Génesis).
-   - El segmento donde se encuentra el capítulo ${ctx.cap} debe quedar **resaltado con la clase "activo"** y un marcador dorado indicando "Cap ${ctx.cap}".
-   - Colores y estilos exactamente iguales al ejemplo que te doy, adaptando los contenidos al libro de Génesis.
+════════════════════════════════════════
+SECCIÓN 1 · PANORAMA DEL LIBRO
+════════════════════════════════════════
 
-**IMPORTANTE:** El HTML final debe usar **exclusivamente estilos en línea**, sin clases CSS externas, y debe ser idéntico en estructura visual a este modelo (sustituye cada evento y versículo según el capítulo ${ctx.cap}):
+Mostrá una línea de tiempo HORIZONTAL que represente el libro completo de ${ctx.libro},
+dividido en 4 a 6 períodos o segmentos narrativos según el libro que corresponda.
 
---- MODELO EXACTO DEL HTML QUE DEBES GENERAR ---
-<div style="font-family: Georgia, serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 40px 20px; border-radius: 16px; min-height: 600px;">
-  <h2 style="text-align: center; color: #f0c040; font-size: 1.6em; margin-bottom: 8px; text-shadow: 0 0 10px rgba(240,192,64,0.5);">⏳ Línea de Tiempo</h2>
-  <h3 style="text-align: center; color: #e8d5a3; font-size: 1.1em; margin-bottom: 40px; font-weight: normal; letter-spacing: 1px;">${ctx.libro} Capítulo ${ctx.cap}</h3>
+Cada segmento debe mostrar:
+  • Ícono o símbolo representativo (emoji temático)
+  • Nombre del período histórico (ej: "Era Patriarcal", "Éxodo y Desierto")
+  • Personaje principal del segmento
+  • Evento clave más representativo (una frase corta)
+  • Rango de capítulos
+  • Fecha aproximada (ej: ~2000 a.C., ~1446 a.C.) — usá fechas de la cronología bíblica conservadora
 
-  <!-- LÍNEA VERTICAL DEL CAPÍTULO -->
-  <div style="position: relative; max-width: 680px; margin: 0 auto 50px auto;">
-    <div style="position: absolute; left: 28px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, #f0c040, #c8962a, #f0c040); border-radius: 2px;"></div>
-    <!-- Repetir este bloque por cada evento del capítulo -->
-    <div style="position: relative; margin-bottom: 36px; padding-left: 72px;">
-      <div style="position: absolute; left: 14px; top: 8px; width: 30px; height: 30px; background: radial-gradient(circle, #fff8c0, #f0c040); border-radius: 50%; border: 3px solid #c8962a; box-shadow: 0 0 14px rgba(240,192,64,0.8); display: flex; align-items: center; justify-content: center;">
-        <span style="font-size: 0.75em;">✦</span>
-      </div>
-      <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(240,192,64,0.3); border-left: 4px solid #f0c040; border-radius: 10px; padding: 16px 18px;">
-        <span style="display: inline-block; background: #f0c040; color: #1a1a2e; font-size: 0.7em; font-weight: bold; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; letter-spacing: 1px;">VERSÍCULOS X‑Y</span>
-        <h4 style="color: #f0c040; margin: 0 0 6px 0; font-size: 1.05em;">Título del evento</h4>
-        <p style="color: #d4c5a0; margin: 0; font-size: 0.92em; line-height: 1.6;">Descripción precisa del evento.</p>
-      </div>
-    </div>
-    <!-- Fin del bloque, se repite para cada evento... -->
+El segmento que contiene el capítulo ${ctx.cap} debe estar VISUALMENTE DESTACADO:
+  • Fondo con gradiente dorado brillante
+  • Borde superior de 4px sólido en #f0c040
+  • Sombra luminosa: box-shadow: 0 0 24px rgba(240,192,64,0.7)
+  • Marcador flotante encima: "📍 Cap. ${ctx.cap}" en etiqueta dorada
+  • Altura mayor que los demás segmentos (al menos 20px más alto)
+
+Los segmentos NO activos deben tener fondo oscuro semitransparente rgba(255,255,255,0.05)
+y borde sutil rgba(240,192,64,0.2). Texto en color #c8962a.
+
+LÓGICA DE SEGMENTOS POR LIBRO — usá exactamente estos segmentos si el libro coincide:
+
+Si el libro es Génesis (50 caps):
+  🌟 Creación y caída — Adán, Eva — "Dios crea el mundo" — Caps 1–5 — ~4000 a.C.
+  🌊 Diluvio y dispersión — Noé — "El arca y el pacto" — Caps 6–11 — ~2350 a.C.
+  🏕️ Llamado y pactos — Abraham — "Salí de tu tierra" — Caps 12–25 — ~2091 a.C.
+  👨‍👦 Isaac, Jacob, Esaú — Jacob — "La lucha con el ángel" — Caps 26–36 — ~1900 a.C.
+  🌾 José en Egipto — José — "Lo que para mal, Dios lo tornó a bien" — Caps 37–50 — ~1876 a.C.
+
+Si el libro es Éxodo (40 caps):
+  👶 Opresión y nacimiento de Moisés — Moisés — "La zarza ardiente" — Caps 1–4 — ~1526 a.C.
+  🐸 Las plagas sobre Egipto — Moisés / Faraón — "Deja ir a mi pueblo" — Caps 5–12 — ~1446 a.C.
+  🌊 El mar Rojo y el desierto — Israel — "Camino a la Tierra Prometida" — Caps 13–18 — ~1446 a.C.
+  ⛰️ El Sinaí y la Ley — Moisés — "Los Diez Mandamientos" — Caps 19–24 — ~1446 a.C.
+  🏗️ El Tabernáculo — Israel — "Instrucciones del Santuario" — Caps 25–40 — ~1445 a.C.
+
+Si el libro es Levítico (27 caps):
+  🔥 Sistema de ofrendas — Israel — "Holocaustos y ofrendas de paz" — Caps 1–7 — ~1445 a.C.
+  👨‍⚕️ Consagración sacerdotal — Aarón e hijos — "La ordenación de los sacerdotes" — Caps 8–10 — ~1445 a.C.
+  ✅ Leyes de pureza — Israel — "Lo limpio y lo inmundo" — Caps 11–15 — ~1445 a.C.
+  🕊️ Día de Expiación — Sumo sacerdote — "Yom Kipur" — Cap 16 — ~1445 a.C.
+  ❤️ Código de santidad — Israel — "Sed santos porque yo soy santo" — Caps 17–27 — ~1445 a.C.
+
+Si el libro es Números (36 caps):
+  📊 Censo y organización — Moisés — "El primer censo de Israel" — Caps 1–10 — ~1445 a.C.
+  😤 Rebeliones en el desierto — Israel — "La murmuración del pueblo" — Caps 11–19 — ~1444 a.C.
+  🗺️ Frontera de Canaán y nuevas leyes — Israel — "Las hijas de Zelofehad" — Caps 20–27 — ~1407 a.C.
+  ⚔️ Conquistas y repartos — Israel — "Derrota de Madián" — Caps 28–36 — ~1406 a.C.
+
+Si el libro es Deuteronomio (34 caps):
+  🎙️ Primer discurso de Moisés — Moisés — "Recordad lo que Dios hizo" — Caps 1–4 — ~1406 a.C.
+  📜 Segundo discurso: la Ley — Moisés — "Shemá Israel" — Caps 5–26 — ~1406 a.C.
+  🤝 Tercer discurso: el pacto — Moisés — "Renovación del pacto en Moab" — Caps 27–30 — ~1406 a.C.
+  🌅 Despedida y muerte de Moisés — Moisés / Josué — "Subió al Monte Nebo" — Caps 31–34 — ~1406 a.C.
+
+Si el libro es Josué (24 caps):
+  🏁 Preparación para la conquista — Josué — "Sed fuertes y valientes" — Caps 1–5 — ~1406 a.C.
+  ⚔️ Conquista de Canaán — Josué / Israel — "La caída de Jericó" — Caps 6–12 — ~1400 a.C.
+  🗺️ Reparto de la tierra — Josué — "División por tribus" — Caps 13–21 — ~1390 a.C.
+  📣 Discurso final de Josué — Josué — "Yo y mi casa serviremos a Jehová" — Caps 22–24 — ~1375 a.C.
+
+Si el libro es Salmos (150 caps):
+  👑 Salmos de David (reinado y vida) — David — "El Señor es mi pastor" — Caps 1–41 — ~1000 a.C.
+  🏛️ Salmos de los hijos de Coré y Asaf — Varios — "Como el ciervo brama" — Caps 42–89 — ~950 a.C.
+  🙌 Salmos de alabanza y peregrinación — Varios — "Cánticos de los grados" — Caps 90–106 — ~900 a.C.
+  📖 Salmos de la Palabra y la creación — Anónimos — "Lámpara es tu palabra" — Caps 107–150 — ~500 a.C.
+
+Para cualquier otro libro no listado, inferí segmentos equivalentes basándote en:
+  - La estructura narrativa o temática del libro
+  - Los personajes principales por sección
+  - La cronología bíblica conservadora
+  - Eventos clave por bloque de capítulos
+
+DISEÑO DE LA BARRA HORIZONTAL:
+  • Contenedor: display:flex; gap:8px; align-items:flex-end; overflow-x:auto; padding:16px 0 8px 0
+  • Cada segmento: flex:1; min-width:100px; border-radius:12px; padding:14px 10px; text-align:center; position:relative; transition:all 0.3s
+  • Segmento activo: height:140px mínimo; los demás: height:110px
+  • Texto del ícono: font-size:1.6em; margin-bottom:6px
+  • Nombre período: font-weight:bold; font-size:0.72em; margin-bottom:4px
+  • Personaje: font-size:0.68em; opacity:0.85; margin-bottom:3px
+  • Evento clave: font-size:0.62em; font-style:italic; opacity:0.75; margin-bottom:4px
+  • Rango caps: display:inline-block; background:rgba(240,192,64,0.2); padding:2px 8px; border-radius:10px; font-size:0.62em
+  • Fecha: font-size:0.6em; opacity:0.65; margin-top:4px
+
+════════════════════════════════════════
+SECCIÓN 2 · ZIGZAG DEL CAPÍTULO
+════════════════════════════════════════
+
+Dividí el capítulo ${ctx.cap} de ${ctx.libro} en 5 a 8 eventos narrativos importantes,
+cubriendo TODO el capítulo sin dejar versículos significativos sin representar.
+
+Cada evento debe contener:
+  • Rango de versículos (ej: vv. 1-3)
+  • Título del evento (breve, evocador, máx. 6 palabras)
+  • Descripción narrativa (2 a 3 oraciones fieles al texto bíblico, en español, tono expositivo)
+
+DISEÑO DEL ZIGZAG:
+  • Contenedor principal: position:relative; max-width:700px; margin:0 auto; padding:20px 0
+  • Línea central vertical: position:absolute; left:50%; top:0; bottom:0; width:3px;
+    background:linear-gradient(to bottom, #f0c040, #c8962a, #f0c040); transform:translateX(-50%)
+  • Los eventos se alternan: los impares van a la IZQUIERDA (texto en columna izquierda, punto en el centro),
+    los pares van a la DERECHA (punto en el centro, texto en columna derecha)
+  • Cada fila del zigzag: display:flex; align-items:center; margin-bottom:40px; position:relative
+  • Tarjeta de evento (lado izquierdo): width:44%; margin-right:6%; text-align:right
+  • Tarjeta de evento (lado derecho): width:44%; margin-left:6%; text-align:left
+  • Punto central: position:absolute; left:50%; transform:translateX(-50%);
+    width:36px; height:36px; background:radial-gradient(circle, #fff8c0, #f0c040);
+    border:3px solid #c8962a; border-radius:50%; box-shadow:0 0 16px rgba(240,192,64,0.8);
+    display:flex; align-items:center; justify-content:center; font-size:0.8em; z-index:2
+  • Tarjeta interior: background:rgba(255,255,255,0.06); border:1px solid rgba(240,192,64,0.3);
+    border-radius:12px; padding:16px 18px
+  • Para tarjetas izquierdas: border-right:4px solid #f0c040
+  • Para tarjetas derechas: border-left:4px solid #f0c040
+  • Etiqueta de versículos: display:inline-block; background:#f0c040; color:#1a1a2e;
+    font-size:0.68em; font-weight:bold; padding:2px 10px; border-radius:12px; margin-bottom:8px; letter-spacing:1px
+  • Título del evento: color:#f0c040; font-size:1em; margin:0 0 6px 0; font-weight:bold
+  • Descripción: color:#d4c5a0; font-size:0.9em; line-height:1.65; margin:0
+
+════════════════════════════════════════
+CONTENEDOR GLOBAL Y TIPOGRAFÍA
+════════════════════════════════════════
+
+Envolvé TODO el HTML en este div raíz:
+<div style="font-family: Georgia, serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 40px 24px;
+            border-radius: 16px;
+            min-height: 700px;
+            color: #e8d5a3;">
+
+Encabezado general (antes de la Sección 1):
+  <h2> con: color:#f0c040; text-align:center; font-size:1.7em; text-shadow:0 0 10px rgba(240,192,64,0.5); margin-bottom:4px
+  <h3> con: color:#e8d5a3; text-align:center; font-size:1.05em; font-weight:normal; letter-spacing:1px; margin-bottom:32px
+
+Subtítulo de cada sección:
+  <h3> con: color:#e8d5a3; font-size:1.05em; font-weight:normal; text-align:center;
+       border-bottom:1px solid rgba(240,192,64,0.25); padding-bottom:10px; margin-bottom:28px
+
+Separador entre secciones:
+  <div style="height:2px; background:linear-gradient(to right, transparent, #f0c040, transparent); margin:44px 0;">
+
+Pie de página (al final del div raíz):
+  <div style="text-align:center; margin-top:36px; padding-top:20px; border-top:1px solid rgba(240,192,64,0.2);">
+    <p style="color:rgba(212,197,160,0.6); font-size:0.78em; font-style:italic;">
+      "Versículo más representativo del capítulo ${ctx.cap} en texto literal de RVR1960"
+    </p>
   </div>
 
-  <!-- BARRA HORIZONTAL DEL LIBRO (GÉNESIS) -->
-  <div style="max-width: 720px; margin: 0 auto;">
-    <h3 style="color: #e8d5a3; font-size: 1.1em; margin-bottom: 20px; font-weight: normal; text-align: center;">Panorama de Génesis</h3>
-    <div style="position: relative; width: 100%; height: 64px; background: rgba(255,255,255,0.04); border-radius: 12px; overflow: visible; display: flex; align-items: stretch;">
-      <div style="position: absolute; left: 0%; top: 8px; height: 48px; width: 10%; background: rgba(240,192,64,0.15); border: 1px solid rgba(240,192,64,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; padding: 0 4px; color: #c8962a; text-align: center; line-height: 1.2;">Creación<br/>1‑5</div>
-      <div style="position: absolute; left: 10%; top: 8px; height: 48px; width: 10%; background: rgba(240,192,64,0.15); border: 1px solid rgba(240,192,64,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; padding: 0 4px; color: #c8962a; text-align: center; line-height: 1.2;">Arca<br/>6‑11</div>
-      <div style="position: absolute; left: 20%; top: 0px; height: 64px; width: 16%; background: linear-gradient(135deg, rgba(240,192,64,0.4), rgba(200,150,42,0.4)); border: 2px solid #f0c040; border-radius: 8px; box-shadow: 0 0 20px rgba(240,192,64,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.65em; font-weight: bold; padding: 0 4px; color: #fff; text-align: center; line-height: 1.2;">Llamado a Abraham<br/>12‑25</div>
-      <div style="position: absolute; left: 36%; top: 8px; height: 48px; width: 12%; background: rgba(240,192,64,0.15); border: 1px solid rgba(240,192,64,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; padding: 0 4px; color: #c8962a; text-align: center; line-height: 1.2;">Isaac Jacob Esaú<br/>26‑36</div>
-      <div style="position: absolute; left: 48%; top: 8px; height: 48px; width: 12%; background: rgba(240,192,64,0.15); border: 1px solid rgba(240,192,64,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.65em; padding: 0 4px; color: #c8962a; text-align: center; line-height: 1.2;">José<br/>37‑50</div>
-      <!-- Marcador del capítulo actual -->
-      <div style="position: absolute; left: 28%; top: -16px; transform: translateX(-50%); background: #f0c040; color: #1a1a2e; font-weight: bold; font-size: 0.68em; padding: 2px 10px; border-radius: 12px; white-space: nowrap;">Cap ${ctx.cap}</div>
-    </div>
-  </div>
+════════════════════════════════════════
+REGLAS ESTRICTAS DE SALIDA
+════════════════════════════════════════
 
-  <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(240,192,64,0.2);">
-    <p style="color: rgba(212,197,160,0.6); font-size: 0.78em; font-style: italic;">"Versículo clave del capítulo"</p>
-  </div>
-</div>
---- FIN DEL MODELO ---
-
-Reglas estrictas:
-- NO uses markdown ni rodees el JSON con comillas triples.
-- Todo el HTML debe estar dentro del string "contenido_html", válido y escapado correctamente.
-- Adaptá los eventos de la línea vertical al contenido real de ${ctx.libro} ${ctx.cap} (leé el capítulo y dividilo en 4‑7 eventos importantes según los versículos).
-- La barra del libro debe mostrar exactamente los cinco segmentos de Génesis que figuran en el modelo, y el marcador "Cap ${ctx.cap}" debe posicionarse sobre el segmento correcto.
+1. Devolvé SOLO el objeto JSON. Sin markdown, sin bloques de código, sin texto previo ni posterior.
+2. Todo el HTML va dentro del string "contenido_html", correctamente escapado (sin saltos de línea literales dentro del string JSON).
+3. Usá EXCLUSIVAMENTE estilos en línea. Ninguna clase CSS externa, ningún bloque <style>.
+4. El zigzag debe alternar estrictamente izquierda-derecha desde el primer evento.
+5. El segmento activo de la barra horizontal debe corresponder al capítulo ${ctx.cap} real — verificá en qué bloque cae.
+6. El versículo del pie debe ser literal de RVR1960, no parafraseado.
+7. Cubrí el capítulo completo en el zigzag. No te detengas antes del último versículo.
 `;
 }
-   
     } else if (tipo === "quiz") {
       prompt = `Generá un cuestionario bíblico en JSON para ${ctx.libro} capítulo ${ctx.cap}.
 Título: "${titulo || `¿Cuánto entendiste de ${ctx.libro} ${ctx.cap}?`}"
