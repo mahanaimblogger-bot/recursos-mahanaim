@@ -44,7 +44,7 @@ const LIBROS_CAPITULOS: Record<string, number> = {
   "2 Pedro": 3, "1 Juan": 5, "2 Juan": 1, "3 Juan": 1, "Judas": 1, "Apocalipsis": 22
 };
 
-// Períodos bíblicos para la línea de tiempo general del libro
+// Períodos bíblicos (mantenidos por si se usan en el futuro)
 const PERIODOS_BIBLICOS: Record<string, { nombre: string; color: string; inicio: number; fin: number }> = {
   genesis: { nombre: "Creación y Patriarcas", color: "#8B4513", inicio: 0, fin: 20 },
   exodo: { nombre: "Éxodo y Peregrinación", color: "#D2691E", inicio: 20, fin: 40 },
@@ -114,8 +114,8 @@ const PERIODOS_BIBLICOS: Record<string, { nombre: string; color: string; inicio:
   apocalipsis: { nombre: "La Victoria Final", color: "#C0C0C0", inicio: 25, fin: 30 },
 };
 
+// TIPOS DE RECURSOS (sin estudio, exégesis ni línea de tiempo)
 const TIPOS = [
-  { id: "estudio", icon: "📖", label: "Estudio Bíblico", gen: false },
   { id: "sermon", icon: "🛐", label: "Sermón / Prédica", gen: false },
   { id: "video", icon: "🎬", label: "Video (YouTube)", gen: false },
   { id: "audio", icon: "🎧", label: "Audio / Podcast", gen: false },
@@ -124,7 +124,6 @@ const TIPOS = [
   { id: "pdf", icon: "📄", label: "PDF / Documento", gen: false },
   { id: "mapa", icon: "🗺️", label: "Mapa Interactivo", gen: false },
   { id: "enlace", icon: "🔗", label: "Recurso Externo", gen: false },
-  { id: "cronologia", icon: "⏳", label: "Línea de Tiempo", gen: true },
   { id: "personaje", icon: "👤", label: "Ficha de Personaje", gen: true },
   { id: "glosario", icon: "📚", label: "Glosario de Términos", gen: true },
   { id: "himno", icon: "🎵", label: "Himno / Alabanza", gen: false },
@@ -132,24 +131,24 @@ const TIPOS = [
   { id: "devocional", icon: "✍️", label: "Devocional", gen: true },
   { id: "hoja", icon: "🖨️", label: "Hoja de Trabajo", gen: true },
   { id: "testimonio", icon: "🎙️", label: "Testimonio", gen: false },
-  { id: "exegesis", icon: "🔬", label: "Comentario Exegético", gen: false },
   { id: "plan", icon: "🧭", label: "Plan de Lectura", gen: true },
 ];
 
-// ── Paleta ──
+// ── Paleta Catedral ──
 const C = {
-  bg: "#0f0e0c",
-  surface: "#1a1814",
-  card: "#221f1a",
-  border: "#3a3228",
-  gold: "#c9a227",
+  bg: "#fdfbf7",
+  surface: "#ffffff",
+  card: "#fdfbf7",
+  border: "#d4c4a8",
+  gold: "#d4ac0d",
   goldLight: "#e8c96d",
-  goldDim: "#7a5f10",
-  text: "#e8e0d0",
-  muted: "#8a7d6a",
-  accent: "#bf360c",
+  goldDim: "#b7950b",
+  text: "#3e2723",
+  muted: "#8d6e63",
+  accent: "#1a5276",
   green: "#2d6a4f",
-  purple: "#5e3a7a",
+  purple: "#6b3fa0",
+  azulOscuro: "#1a3a5c",
 };
 
 // ── Tipos ──
@@ -189,180 +188,14 @@ function CopyBtn({ text }: { text: string }) {
 }
 
 function PathBox({ children }: { children: React.ReactNode }) {
-  return <code style={{ background: "#061008", border: "1px solid #1a4a28", borderRadius: 5, padding: "3px 8px", fontFamily: "monospace", fontSize: 12, color: "#7dda9a" }}>{children}</code>;
+  return <code style={{ background: "#fef9e7", border: "1px solid #d4ac0d", borderRadius: 5, padding: "3px 8px", fontFamily: "monospace", fontSize: 12, color: "#1a3a5c" }}>{children}</code>;
 }
 
 function InstrStep({ n, children }: { n: string | number; children: React.ReactNode }) {
   return (
     <div style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
-      <div style={{ width: 22, height: 22, borderRadius: "50%", background: C.green, color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{n}</div>
-      <div style={{ fontSize: 13, color: "#c8e6d8", lineHeight: 1.6 }}>{children}</div>
-    </div>
-  );
-}
-
-// ── Línea de tiempo visual dual ──
-function TimelineDual({ libro, slug, cap }: { libro: string; slug: string; cap: string }) {
-  const totalCaps = LIBROS_CAPITULOS[libro] || 1;
-  const capNum = parseInt(cap) || 1;
-  const capPercent = Math.min((capNum / totalCaps) * 100, 100);
-  const periodo = PERIODOS_BIBLICOS[slug];
-
-  const esAT = Object.keys(LIBROS_SLUGS).indexOf(libro) < 39;
-  const totalLibrosAT = 39;
-
-  // Posición del libro en su testamento
-  const libroIndex = Object.keys(LIBROS_SLUGS).indexOf(libro);
-  const testamentoTotal = esAT ? totalLibrosAT : Object.keys(LIBROS_SLUGS).length - totalLibrosAT;
-  const testamentoIndex = esAT ? libroIndex : libroIndex - totalLibrosAT;
-  const libroPercent = ((testamentoIndex + 0.5) / testamentoTotal) * 100;
-
-  return (
-    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 18, marginBottom: 16 }}>
-      {/* Línea del capítulo dentro del libro */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 12, color: C.gold, marginBottom: 8, fontWeight: "bold", letterSpacing: 1 }}>
-          📍 POSICIÓN DEL CAPÍTULO DENTRO DEL LIBRO
-        </div>
-        <div style={{ background: C.surface, borderRadius: 8, padding: "12px 16px", position: "relative" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: C.muted, marginBottom: 6 }}>
-            <span>Cap. 1</span>
-            <span style={{ color: C.goldLight, fontWeight: "bold" }}>{libro} — Cap. {cap} de {totalCaps}</span>
-            <span>Cap. {totalCaps}</span>
-          </div>
-          {/* Barra de progreso */}
-          <div style={{ position: "relative", height: 32, background: "#0a0908", borderRadius: 6, overflow: "hidden" }}>
-            {/* Marcas de capítulos */}
-            {Array.from({ length: Math.min(totalCaps, 30) }, (_, i) => {
-              const pct = ((i + 1) / totalCaps) * 100;
-              return (
-                <div
-                  key={i}
-                  style={{
-                    position: "absolute",
-                    left: `${pct}%`,
-                    top: 0,
-                    bottom: 0,
-                    width: 1,
-                    background: pct === capPercent ? "transparent" : "rgba(201,162,39,0.15)",
-                  }}
-                />
-              );
-            })}
-            {/* Rango del capítulo seleccionado */}
-            <div
-              style={{
-                position: "absolute",
-                left: `${Math.max(0, capPercent - (100 / totalCaps) / 2)}%`,
-                width: `${100 / totalCaps}%`,
-                top: 0,
-                bottom: 0,
-                background: `linear-gradient(180deg, ${C.gold}44, ${C.goldDim}88)`,
-                borderRadius: 3,
-                border: `2px solid ${C.gold}`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: `0 0 12px ${C.gold}66`,
-              }}
-            >
-              <span style={{ fontSize: 10, color: C.goldLight, fontWeight: "bold" }}>{cap}</span>
-            </div>
-          </div>
-          {/* Indicador numérico */}
-          <div style={{ display: "flex", justifyContent: "center", marginTop: 6 }}>
-            <span style={{ background: C.goldDim, color: C.goldLight, fontSize: 11, padding: "2px 10px", borderRadius: 10, border: `1px solid ${C.gold}` }}>
-              Capítulo {cap} / {totalCaps} — {capPercent.toFixed(1)}% del libro
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Línea del libro dentro del testamento / línea general */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 12, color: C.gold, marginBottom: 8, fontWeight: "bold", letterSpacing: 1 }}>
-          📖 POSICIÓN DEL LIBRO EN LA BIBLIA ({esAT ? "ANTIGUO TESTAMENTO" : "NUEVO TESTAMENTO"})
-        </div>
-        <div style={{ background: C.surface, borderRadius: 8, padding: "12px 16px", position: "relative" }}>
-          <div style={{ position: "relative", height: 40, background: "#0a0908", borderRadius: 6, overflow: "hidden" }}>
-            {/* Marcar cada libro */}
-            {Object.keys(LIBROS_SLUGS).map((l, i) => {
-              const isThisTestament = esAT ? i < totalLibrosAT : i >= totalLibrosAT;
-              if (!isThisTestament) return null;
-              const idx = esAT ? i : i - totalLibrosAT;
-              const total = esAT ? totalLibrosAT : Object.keys(LIBROS_SLUGS).length - totalLibrosAT;
-              const pct = ((idx + 0.5) / total) * 100;
-              const isCurrentBook = l === libro;
-              const bookSlug = LIBROS_SLUGS[l];
-              const p = PERIODOS_BIBLICOS[bookSlug];
-              return (
-                <div
-                  key={l}
-                  style={{
-                    position: "absolute",
-                    left: `${pct}%`,
-                    top: isCurrentBook ? 4 : 12,
-                    width: isCurrentBook ? 4 : 2,
-                    height: isCurrentBook ? 32 : 16,
-                    background: isCurrentBook ? C.gold : (p?.color || C.border),
-                    borderRadius: 2,
-                    transform: "translateX(-50%)",
-                    transition: "all 0.3s",
-                    boxShadow: isCurrentBook ? `0 0 8px ${C.gold}88` : "none",
-                    zIndex: isCurrentBook ? 2 : 1,
-                  }}
-                  title={l}
-                />
-              );
-            })}
-            {/* Etiqueta del libro actual */}
-            <div
-              style={{
-                position: "absolute",
-                left: `${libroPercent}%`,
-                top: 0,
-                transform: "translateX(-50%)",
-                zIndex: 3,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <span style={{
-                background: `linear-gradient(135deg, ${C.goldDim}, #7a5210)`,
-                color: C.goldLight,
-                fontSize: 9,
-                padding: "1px 6px",
-                borderRadius: 4,
-                border: `1px solid ${C.gold}`,
-                whiteSpace: "nowrap",
-                fontWeight: "bold",
-              }}>
-                {libro}
-              </span>
-            </div>
-          </div>
-          {/* Labels de testamento */}
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-            <span style={{ fontSize: 11, color: C.muted }}>{esAT ? "Génesis" : "Mateo"}</span>
-            <span style={{ background: C.goldDim, color: C.goldLight, fontSize: 11, padding: "2px 10px", borderRadius: 10, border: `1px solid ${C.gold}` }}>
-              Libro #{testamentoIndex + 1} de {testamentoTotal} del {esAT ? "AT" : "NT"}
-            </span>
-            <span style={{ fontSize: 11, color: C.muted }}>{esAT ? "Malaquías" : "Apocalipsis"}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Info del período bíblico */}
-      {periodo && (
-        <div style={{ background: "#0d1a12", border: `1px solid ${C.green}`, borderRadius: 8, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 14, height: 14, borderRadius: "50%", background: periodo.color, flexShrink: 0 }} />
-          <div>
-            <span style={{ color: "#5dd49a", fontSize: 12, fontWeight: "bold" }}>Período: </span>
-            <span style={{ color: "#c8e6d8", fontSize: 12 }}>{periodo.nombre}</span>
-          </div>
-        </div>
-      )}
+      <div style={{ width: 22, height: 22, borderRadius: "50%", background: C.azulOscuro, color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{n}</div>
+      <div style={{ fontSize: 13, color: C.text, lineHeight: 1.6 }}>{children}</div>
     </div>
   );
 }
@@ -383,7 +216,7 @@ function StepBookChapter({ onNext }: { onNext: (data: CtxData) => void }) {
               <button
                 key={m}
                 style={{
-                  background: modo === m ? `linear-gradient(135deg, ${C.goldDim}, #5a3d08)` : "transparent",
+                  background: modo === m ? C.azulOscuro : "transparent",
                   color: modo === m ? C.goldLight : C.muted,
                   border: `1px solid ${modo === m ? C.gold : C.border}`,
                   borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold", flex: 1, textAlign: "center",
@@ -412,16 +245,15 @@ function StepBookChapter({ onNext }: { onNext: (data: CtxData) => void }) {
             value={cap} onChange={e => setCap(e.target.value)}
           />
         </Field>
-        {libro && cap && <TimelineDual libro={libro} slug={LIBROS_SLUGS[libro]} cap={cap} />}
         {modo === "nuevo" && libro && cap && (
-          <div style={{ background: "#1a1000", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, fontSize: 13, color: "#d4b060" }}>
+          <div style={{ background: "#fef9e7", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, fontSize: 13, color: C.text }}>
             ⚠️ <strong>Capítulo nuevo:</strong> Al final deberás actualizar también <PathBox>data/{LIBROS_SLUGS[libro]}/capitulos.json</PathBox> e <PathBox>data/index.json</PathBox> para que aparezca en la web.
           </div>
         )}
       </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
         <button
-          style={{ background: `linear-gradient(135deg, ${C.goldDim}, #7a5210)`, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
+          style={{ background: C.azulOscuro, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
           disabled={!libro || !cap}
           onClick={() => onNext({ libro, slug: LIBROS_SLUGS[libro], cap, modo })}
         >
@@ -438,19 +270,19 @@ function StepTipo({ ctx, onNext, onBack }: { ctx: CtxData; onNext: (d: CtxData) 
   return (
     <div>
       <p style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: 2, color: C.gold, marginBottom: 14, fontFamily: "Georgia, serif" }}>Paso 2 — Tipo de recurso</p>
-      <div style={{ background: "#1a1000", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, fontSize: 13, color: "#d4b060" }}>
+      <div style={{ background: "#fef9e7", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, fontSize: 13, color: C.text }}>
         📌 <strong>{ctx.libro} — Capítulo {ctx.cap}</strong> &nbsp;|&nbsp; Archivo destino: <PathBox>data/{ctx.slug}/cap-{ctx.cap}.json</PathBox>
       </div>
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: "18px 20px", marginBottom: 14 }}>
-        <div style={{ background: "#0d2a1a", border: `1px solid ${C.green}`, borderRadius: 6, padding: "8px 12px", fontSize: 12, color: "#7dd4a0", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-          ✨ Los recursos marcados con <strong style={{ color: "#5dd49a" }}>AUTO</strong> son generados automáticamente con IA — solo indicás los datos básicos.
+        <div style={{ background: "#e8f4f8", border: `1px solid ${C.accent}`, borderRadius: 6, padding: "8px 12px", fontSize: 12, color: C.accent, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          ✨ Los recursos marcados con <strong style={{ color: C.goldDim }}>AUTO</strong> son generados automáticamente con IA — solo indicás los datos básicos.
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 10 }}>
           {TIPOS.map(t => (
             <button
               key={t.id}
               style={{
-                background: selected === t.id ? `linear-gradient(135deg, ${C.goldDim}, #5a3d08)` : C.card,
+                background: selected === t.id ? C.azulOscuro : C.card,
                 border: `2px solid ${selected === t.id ? C.gold : C.border}`,
                 borderRadius: 8, padding: "12px 10px", cursor: "pointer", textAlign: "center", transition: "all .2s",
                 color: selected === t.id ? C.goldLight : C.text,
@@ -470,7 +302,7 @@ function StepTipo({ ctx, onNext, onBack }: { ctx: CtxData; onNext: (d: CtxData) 
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
         <button style={{ background: "transparent", color: C.muted, border: `1px solid ${C.border}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif" }} onClick={onBack}>← Volver</button>
         <button
-          style={{ background: `linear-gradient(135deg, ${C.goldDim}, #7a5210)`, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
+          style={{ background: C.azulOscuro, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
           disabled={!selected}
           onClick={() => selected && onNext({ ...ctx, tipo: selected })}
         >
@@ -519,192 +351,7 @@ function StepForm({ ctx, onResult, onBack }: { ctx: CtxData; onResult: (r: StepR
 
     let prompt = "";
 
-if (tipo === "cronologia") {
-  prompt = `Generá una línea de tiempo bíblica COMPLETA en JSON para ${ctx.libro} capítulo ${ctx.cap}.
-Tema: ${tema || "eventos del capítulo y su contexto histórico-canónico"}
-
-IMPORTANTE: Devolvé SOLO el objeto JSON puro, SIN markdown, SIN \`\`\`json, SIN \`\`\`, SIN texto antes o después.
-
-{
-  "tipo": "cronologia",
-  "titulo": "Línea de tiempo: ${ctx.libro} ${ctx.cap}",
-  "contenido_html": "...HTML completo aquí..."
-}
-
-════════════════════════════════════════
-ARQUITECTURA VISUAL (dos secciones en orden)
-════════════════════════════════════════
-
-SECCIÓN 1 — PANORAMA DEL LIBRO (encabezado contextual, va ARRIBA)
-SECCIÓN 2 — ZIGZAG DEL CAPÍTULO (desarrollo detallado, va ABAJO)
-
-════════════════════════════════════════
-SECCIÓN 1 · PANORAMA DEL LIBRO
-════════════════════════════════════════
-
-Mostrá una línea de tiempo HORIZONTAL que represente el libro completo de ${ctx.libro},
-dividido en 4 a 6 períodos o segmentos narrativos según el libro que corresponda.
-
-Cada segmento debe mostrar:
-  • Ícono o símbolo representativo (emoji temático)
-  • Nombre del período histórico (ej: "Era Patriarcal", "Éxodo y Desierto")
-  • Personaje principal del segmento
-  • Evento clave más representativo (una frase corta)
-  • Rango de capítulos
-  • Fecha aproximada (ej: ~2000 a.C., ~1446 a.C.) — usá fechas de la cronología bíblica conservadora
-
-El segmento que contiene el capítulo ${ctx.cap} debe estar VISUALMENTE DESTACADO:
-  • Fondo con gradiente dorado brillante
-  • Borde superior de 4px sólido en #f0c040
-  • Sombra luminosa: box-shadow: 0 0 24px rgba(240,192,64,0.7)
-  • Marcador flotante encima: "📍 Cap. ${ctx.cap}" en etiqueta dorada
-  • Altura mayor que los demás segmentos (al menos 20px más alto)
-
-Los segmentos NO activos deben tener fondo oscuro semitransparente rgba(255,255,255,0.05)
-y borde sutil rgba(240,192,64,0.2). Texto en color #c8962a.
-
-LÓGICA DE SEGMENTOS POR LIBRO — usá exactamente estos segmentos si el libro coincide:
-
-Si el libro es Génesis (50 caps):
-  🌟 Creación y caída — Adán, Eva — "Dios crea el mundo" — Caps 1–5 — ~4000 a.C.
-  🌊 Diluvio y dispersión — Noé — "El arca y el pacto" — Caps 6–11 — ~2350 a.C.
-  🏕️ Llamado y pactos — Abraham — "Salí de tu tierra" — Caps 12–25 — ~2091 a.C.
-  👨‍👦 Isaac, Jacob, Esaú — Jacob — "La lucha con el ángel" — Caps 26–36 — ~1900 a.C.
-  🌾 José en Egipto — José — "Lo que para mal, Dios lo tornó a bien" — Caps 37–50 — ~1876 a.C.
-
-Si el libro es Éxodo (40 caps):
-  👶 Opresión y nacimiento de Moisés — Moisés — "La zarza ardiente" — Caps 1–4 — ~1526 a.C.
-  🐸 Las plagas sobre Egipto — Moisés / Faraón — "Deja ir a mi pueblo" — Caps 5–12 — ~1446 a.C.
-  🌊 El mar Rojo y el desierto — Israel — "Camino a la Tierra Prometida" — Caps 13–18 — ~1446 a.C.
-  ⛰️ El Sinaí y la Ley — Moisés — "Los Diez Mandamientos" — Caps 19–24 — ~1446 a.C.
-  🏗️ El Tabernáculo — Israel — "Instrucciones del Santuario" — Caps 25–40 — ~1445 a.C.
-
-Si el libro es Levítico (27 caps):
-  🔥 Sistema de ofrendas — Israel — "Holocaustos y ofrendas de paz" — Caps 1–7 — ~1445 a.C.
-  👨‍⚕️ Consagración sacerdotal — Aarón e hijos — "La ordenación de los sacerdotes" — Caps 8–10 — ~1445 a.C.
-  ✅ Leyes de pureza — Israel — "Lo limpio y lo inmundo" — Caps 11–15 — ~1445 a.C.
-  🕊️ Día de Expiación — Sumo sacerdote — "Yom Kipur" — Cap 16 — ~1445 a.C.
-  ❤️ Código de santidad — Israel — "Sed santos porque yo soy santo" — Caps 17–27 — ~1445 a.C.
-
-Si el libro es Números (36 caps):
-  📊 Censo y organización — Moisés — "El primer censo de Israel" — Caps 1–10 — ~1445 a.C.
-  😤 Rebeliones en el desierto — Israel — "La murmuración del pueblo" — Caps 11–19 — ~1444 a.C.
-  🗺️ Frontera de Canaán y nuevas leyes — Israel — "Las hijas de Zelofehad" — Caps 20–27 — ~1407 a.C.
-  ⚔️ Conquistas y repartos — Israel — "Derrota de Madián" — Caps 28–36 — ~1406 a.C.
-
-Si el libro es Deuteronomio (34 caps):
-  🎙️ Primer discurso de Moisés — Moisés — "Recordad lo que Dios hizo" — Caps 1–4 — ~1406 a.C.
-  📜 Segundo discurso: la Ley — Moisés — "Shemá Israel" — Caps 5–26 — ~1406 a.C.
-  🤝 Tercer discurso: el pacto — Moisés — "Renovación del pacto en Moab" — Caps 27–30 — ~1406 a.C.
-  🌅 Despedida y muerte de Moisés — Moisés / Josué — "Subió al Monte Nebo" — Caps 31–34 — ~1406 a.C.
-
-Si el libro es Josué (24 caps):
-  🏁 Preparación para la conquista — Josué — "Sed fuertes y valientes" — Caps 1–5 — ~1406 a.C.
-  ⚔️ Conquista de Canaán — Josué / Israel — "La caída de Jericó" — Caps 6–12 — ~1400 a.C.
-  🗺️ Reparto de la tierra — Josué — "División por tribus" — Caps 13–21 — ~1390 a.C.
-  📣 Discurso final de Josué — Josué — "Yo y mi casa serviremos a Jehová" — Caps 22–24 — ~1375 a.C.
-
-Si el libro es Salmos (150 caps):
-  👑 Salmos de David (reinado y vida) — David — "El Señor es mi pastor" — Caps 1–41 — ~1000 a.C.
-  🏛️ Salmos de los hijos de Coré y Asaf — Varios — "Como el ciervo brama" — Caps 42–89 — ~950 a.C.
-  🙌 Salmos de alabanza y peregrinación — Varios — "Cánticos de los grados" — Caps 90–106 — ~900 a.C.
-  📖 Salmos de la Palabra y la creación — Anónimos — "Lámpara es tu palabra" — Caps 107–150 — ~500 a.C.
-
-Para cualquier otro libro no listado, inferí segmentos equivalentes basándote en:
-  - La estructura narrativa o temática del libro
-  - Los personajes principales por sección
-  - La cronología bíblica conservadora
-  - Eventos clave por bloque de capítulos
-
-DISEÑO DE LA BARRA HORIZONTAL:
-  • Contenedor: display:flex; gap:8px; align-items:flex-end; overflow-x:auto; padding:16px 0 8px 0
-  • Cada segmento: flex:1; min-width:100px; border-radius:12px; padding:14px 10px; text-align:center; position:relative; transition:all 0.3s
-  • Segmento activo: height:140px mínimo; los demás: height:110px
-  • Texto del ícono: font-size:1.6em; margin-bottom:6px
-  • Nombre período: font-weight:bold; font-size:0.72em; margin-bottom:4px
-  • Personaje: font-size:0.68em; opacity:0.85; margin-bottom:3px
-  • Evento clave: font-size:0.62em; font-style:italic; opacity:0.75; margin-bottom:4px
-  • Rango caps: display:inline-block; background:rgba(240,192,64,0.2); padding:2px 8px; border-radius:10px; font-size:0.62em
-  • Fecha: font-size:0.6em; opacity:0.65; margin-top:4px
-
-════════════════════════════════════════
-SECCIÓN 2 · ZIGZAG DEL CAPÍTULO
-════════════════════════════════════════
-
-Dividí el capítulo ${ctx.cap} de ${ctx.libro} en 5 a 8 eventos narrativos importantes,
-cubriendo TODO el capítulo sin dejar versículos significativos sin representar.
-
-Cada evento debe contener:
-  • Rango de versículos (ej: vv. 1-3)
-  • Título del evento (breve, evocador, máx. 6 palabras)
-  • Descripción narrativa (2 a 3 oraciones fieles al texto bíblico, en español, tono expositivo)
-
-DISEÑO DEL ZIGZAG:
-  • Contenedor principal: position:relative; max-width:700px; margin:0 auto; padding:20px 0
-  • Línea central vertical: position:absolute; left:50%; top:0; bottom:0; width:3px;
-    background:linear-gradient(to bottom, #f0c040, #c8962a, #f0c040); transform:translateX(-50%)
-  • Los eventos se alternan: los impares van a la IZQUIERDA (texto en columna izquierda, punto en el centro),
-    los pares van a la DERECHA (punto en el centro, texto en columna derecha)
-  • Cada fila del zigzag: display:flex; align-items:center; margin-bottom:40px; position:relative
-  • Tarjeta de evento (lado izquierdo): width:44%; margin-right:6%; text-align:right
-  • Tarjeta de evento (lado derecho): width:44%; margin-left:6%; text-align:left
-  • Punto central: position:absolute; left:50%; transform:translateX(-50%);
-    width:36px; height:36px; background:radial-gradient(circle, #fff8c0, #f0c040);
-    border:3px solid #c8962a; border-radius:50%; box-shadow:0 0 16px rgba(240,192,64,0.8);
-    display:flex; align-items:center; justify-content:center; font-size:0.8em; z-index:2
-  • Tarjeta interior: background:rgba(255,255,255,0.06); border:1px solid rgba(240,192,64,0.3);
-    border-radius:12px; padding:16px 18px
-  • Para tarjetas izquierdas: border-right:4px solid #f0c040
-  • Para tarjetas derechas: border-left:4px solid #f0c040
-  • Etiqueta de versículos: display:inline-block; background:#f0c040; color:#1a1a2e;
-    font-size:0.68em; font-weight:bold; padding:2px 10px; border-radius:12px; margin-bottom:8px; letter-spacing:1px
-  • Título del evento: color:#f0c040; font-size:1em; margin:0 0 6px 0; font-weight:bold
-  • Descripción: color:#d4c5a0; font-size:0.9em; line-height:1.65; margin:0
-
-════════════════════════════════════════
-CONTENEDOR GLOBAL Y TIPOGRAFÍA
-════════════════════════════════════════
-
-Envolvé TODO el HTML en este div raíz:
-<div style="font-family: Georgia, serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            padding: 40px 24px;
-            border-radius: 16px;
-            min-height: 700px;
-            color: #e8d5a3;">
-
-Encabezado general (antes de la Sección 1):
-  <h2> con: color:#f0c040; text-align:center; font-size:1.7em; text-shadow:0 0 10px rgba(240,192,64,0.5); margin-bottom:4px
-  <h3> con: color:#e8d5a3; text-align:center; font-size:1.05em; font-weight:normal; letter-spacing:1px; margin-bottom:32px
-
-Subtítulo de cada sección:
-  <h3> con: color:#e8d5a3; font-size:1.05em; font-weight:normal; text-align:center;
-       border-bottom:1px solid rgba(240,192,64,0.25); padding-bottom:10px; margin-bottom:28px
-
-Separador entre secciones:
-  <div style="height:2px; background:linear-gradient(to right, transparent, #f0c040, transparent); margin:44px 0;">
-
-Pie de página (al final del div raíz):
-  <div style="text-align:center; margin-top:36px; padding-top:20px; border-top:1px solid rgba(240,192,64,0.2);">
-    <p style="color:rgba(212,197,160,0.6); font-size:0.78em; font-style:italic;">
-      "Versículo más representativo del capítulo ${ctx.cap} en texto literal de RVR1960"
-    </p>
-  </div>
-
-════════════════════════════════════════
-REGLAS ESTRICTAS DE SALIDA
-════════════════════════════════════════
-
-1. Devolvé SOLO el objeto JSON. Sin markdown, sin bloques de código, sin texto previo ni posterior.
-2. Todo el HTML va dentro del string "contenido_html", correctamente escapado (sin saltos de línea literales dentro del string JSON).
-3. Usá EXCLUSIVAMENTE estilos en línea. Ninguna clase CSS externa, ningún bloque <style>.
-4. El zigzag debe alternar estrictamente izquierda-derecha desde el primer evento.
-5. El segmento activo de la barra horizontal debe corresponder al capítulo ${ctx.cap} real — verificá en qué bloque cae.
-6. El versículo del pie debe ser literal de RVR1960, no parafraseado.
-7. Cubrí el capítulo completo en el zigzag. No te detengas antes del último versículo.
-`;
-}
-    } else if (tipo === "quiz") {
+    if (tipo === "quiz") {
       prompt = `Generá un cuestionario bíblico en JSON para ${ctx.libro} capítulo ${ctx.cap}.
 Título: "${titulo || `¿Cuánto entendiste de ${ctx.libro} ${ctx.cap}?`}"
 Tema/contexto: ${tema || "el capítulo completo"}
@@ -791,33 +438,26 @@ Devolvé SOLO un objeto JSON (sin markdown):
     }
 
     try {
-      // Más tokens para tipos que generan HTML extenso
-      const needsMoreTokens = ["cronologia", "personaje", "glosario"].includes(tipo);
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, max_tokens: needsMoreTokens ? 16000 : 8000 }),
+        body: JSON.stringify({ prompt, max_tokens: 8000 }),
       });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
       const text = data.text || "";
 
-      // Parseo robusto de JSON
       let clean = text.trim();
       let parsed: Record<string, unknown> | null = null;
       let parseError = "";
 
-      // 1) Limpiar fences de markdown (```json ... ``` o ``` ... ```)
       clean = clean.replace(/^\s*```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "");
-      // 2) También limpiar si el fence está sin salto de línea
       clean = clean.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
 
-      // 3) Intentar parseo directo
       try { parsed = JSON.parse(clean); } catch (e1) {
         parseError = e1 instanceof Error ? e1.message : String(e1);
 
-        // 4) Extraer el primer objeto JSON válido con balanceo de llaves
         const firstBrace = clean.indexOf("{");
         if (firstBrace !== -1) {
           let depth = 0;
@@ -838,7 +478,6 @@ Devolvé SOLO un objeto JSON (sin markdown):
             try { parsed = JSON.parse(candidate); } catch (e2) {
               parseError += " | " + (e2 instanceof Error ? e2.message : String(e2));
 
-              // 5) Último recurso: limpiar trailing commas y reintentar
               const noTrailing = candidate.replace(/,\s*([\]}])/g, "$1");
               try { parsed = JSON.parse(noTrailing); } catch (e3) {
                 parseError += " | " + (e3 instanceof Error ? e3.message : String(e3));
@@ -849,7 +488,6 @@ Devolvé SOLO un objeto JSON (sin markdown):
       }
 
       if (!parsed) {
-        // Mostrar un fragmento de lo que devolvió la IA para que el usuario vea el problema
         const preview = clean.length > 300 ? clean.substring(0, 300) + "..." : clean;
         console.error("Parseo fallido. Respuesta IA (primeros 300 chars):", preview);
         console.error("Errores de parseo:", parseError);
@@ -877,8 +515,6 @@ Devolvé SOLO un objeto JSON (sin markdown):
     if (tipo === "enlace") return { ...base, recurso_url: url, contenido_html: notas || undefined };
     if (tipo === "himno") return { ...base, numero_himno: numHimno, compositor, fecha, recurso_url: url || undefined, contenido_html: letraHtml || undefined };
     if (tipo === "testimonio") return { ...base, autor, fecha, recurso_tipo: recursoTipo, recurso_url: url, contenido_html: notas || undefined };
-    if (tipo === "estudio") return { ...base, archivo_html: `/estudios/${ctx.slug}/cap-${ctx.cap}-estudio.html` };
-    if (tipo === "exegesis") return { ...base, archivo_html: `/estudios/${ctx.slug}/cap-${ctx.cap}-exegesis.html` };
     return base;
   }
 
@@ -892,36 +528,25 @@ Devolvé SOLO un objeto JSON (sin markdown):
   return (
     <div>
       <p style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: 2, color: C.gold, marginBottom: 14, fontFamily: "Georgia, serif" }}>Paso 3 — Datos del recurso</p>
-      <div style={{ background: "#1a1000", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, fontSize: 13, color: "#d4b060" }}>
+      <div style={{ background: "#fef9e7", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: "12px 16px", marginBottom: 14, fontSize: 13, color: C.text }}>
         {tipoInfo?.icon} <strong>{tipoInfo?.label}</strong> para {ctx.libro} cap. {ctx.cap}
-        {isAuto && <span style={{ marginLeft: 10, color: "#5dd49a" }}>✨ Generación automática disponible</span>}
+        {isAuto && <span style={{ marginLeft: 10, color: C.goldDim }}>✨ Generación automática disponible</span>}
       </div>
-
-      {/* Vista previa de la línea de tiempo para cronología */}
-      {tipo === "cronologia" && (
-        <TimelineDual libro={ctx.libro} slug={ctx.slug} cap={ctx.cap} />
-      )}
 
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: "18px 20px", marginBottom: 14 }}>
         {/* Campos comunes */}
-        {["estudio", "exegesis", "cronologia", "personaje", "glosario", "quiz", "devocional", "hoja", "plan"].includes(tipo) && (
+        {["personaje", "glosario", "quiz", "devocional", "hoja", "plan"].includes(tipo) && (
           <Field label="Título del recurso">
-            <input style={inputStyle} placeholder={`Ej: Estudio de ${ctx.libro} ${ctx.cap}`} value={titulo} onChange={e => setTitulo(e.target.value)} />
+            <input style={inputStyle} placeholder={`Ej: Recurso de ${ctx.libro} ${ctx.cap}`} value={titulo} onChange={e => setTitulo(e.target.value)} />
           </Field>
         )}
-        {isAuto && tipo !== "cronologia" && (
+        {isAuto && (
           <Field label={tipo === "personaje" ? "Personaje(s) a incluir *" : "Tema o enfoque principal *"}>
             {tipo === "personaje" ? (
               <input style={inputStyle} placeholder="Ej: Agar la Egipcia" value={personajes} onChange={e => setPersonajes(e.target.value)} />
             ) : (
               <input style={inputStyle} placeholder={`Ej: tema central de ${ctx.libro} ${ctx.cap}`} value={tema} onChange={e => setTema(e.target.value)} />
             )}
-          </Field>
-        )}
-        {/* Para cronología siempre pedir tema */}
-        {tipo === "cronologia" && (
-          <Field label="Tema o enfoque principal *">
-            <input style={inputStyle} placeholder={`Ej: Los eventos clave y su contexto histórico`} value={tema} onChange={e => setTema(e.target.value)} />
           </Field>
         )}
         {tipo === "quiz" && (
@@ -1009,16 +634,14 @@ Devolvé SOLO un objeto JSON (sin markdown):
           <>
             {generado && !errorGen && (
               <div style={{ marginTop: 14 }}>
-                <div style={{ background: "#0d2a1a", border: `1px solid ${C.green}`, borderRadius: 6, padding: "8px 12px", fontSize: 12, color: "#7dd4a0", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ background: "#e8f4f8", border: `1px solid ${C.accent}`, borderRadius: 6, padding: "8px 12px", fontSize: 12, color: C.accent, marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
                   ✅ Iteración {iteracion} generada — revisá el resultado abajo
                 </div>
                 <Field label="¿Querés agregar algo más o modificar algo?">
                   <textarea
                     style={textareaStyle}
                     placeholder={
-                      tipo === "cronologia"
-                        ? "Ej: Agregá más eventos históricos / Incluí las fechas aproximadas / Ampliá la sección del NT..."
-                        : tipo === "personaje"
+                      tipo === "personaje"
                         ? "Ej: Agregá más análisis lingüístico del nombre / Incluí más referencias del NT..."
                         : tipo === "quiz"
                         ? "Ej: Hacé las preguntas más difíciles / Agregá 2 preguntas sobre el contexto histórico..."
@@ -1033,7 +656,7 @@ Devolvé SOLO un objeto JSON (sin markdown):
                     🔄 Regenerar con cambios
                   </button>
                   <button
-                    style={{ background: `linear-gradient(135deg, ${C.goldDim}, #7a5210)`, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
+                    style={{ background: C.azulOscuro, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
                     onClick={() => onResult({ json: generado, ctx })}
                   >
                     ✅ Usar este resultado →
@@ -1042,17 +665,17 @@ Devolvé SOLO un objeto JSON (sin markdown):
               </div>
             )}
             {errorGen && (
-              <div style={{ background: "#1a0a0a", border: "1px solid #e74c3c", borderRadius: 8, padding: "12px 16px", marginTop: 10 }}>
+              <div style={{ background: "#fdf2f0", border: "1px solid #e74c3c", borderRadius: 8, padding: "12px 16px", marginTop: 10 }}>
                 <div style={{ color: "#e74c3c", fontSize: 13, fontWeight: "bold", marginBottom: 4 }}>⚠️ No se pudo generar</div>
-                <div style={{ color: "#d4a0a0", fontSize: 12, marginBottom: 10 }}>{errorGen}</div>
+                <div style={{ color: "#c0392b", fontSize: 12, marginBottom: 10 }}>{errorGen}</div>
                 <button style={{ background: "transparent", color: C.muted, border: `1px solid ${C.border}`, borderRadius: 7, padding: "8px 16px", cursor: "pointer", fontSize: 12 }} onClick={() => { setErrorGen(null); setGenerado(null); }}>🔄 Reintentar</button>
               </div>
             )}
             {!generado && !errorGen && (
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
                 <button
-                  style={{ background: `linear-gradient(135deg, ${C.goldDim}, #7a5210)`, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
-                  disabled={generando || (!tema && !personajes && tipo !== "cronologia")}
+                  style={{ background: C.azulOscuro, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
+                  disabled={generando || (!tema && !personajes)}
                   onClick={() => generarConIA()}
                 >
                   {generando ? "⏳ Generando con IA..." : `✨ Generar ${tipoInfo?.label}`}
@@ -1068,7 +691,7 @@ Devolvé SOLO un objeto JSON (sin markdown):
         <button style={{ background: "transparent", color: C.muted, border: `1px solid ${C.border}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif" }} onClick={onBack}>← Volver</button>
         {!isAuto && (
           <button
-            style={{ background: `linear-gradient(135deg, ${C.goldDim}, #7a5210)`, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
+            style={{ background: C.azulOscuro, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }}
             disabled={!titulo && !["video"].includes(tipo)}
             onClick={() => finalJson && onResult({ json: finalJson, ctx })}
           >
@@ -1084,7 +707,7 @@ Devolvé SOLO un objeto JSON (sin markdown):
             <span style={{ color: C.gold, fontWeight: "bold", fontSize: 14 }}>{tipoInfo?.icon} JSON generado</span>
             <CopyBtn text={jsonStr} />
           </div>
-          <div style={{ background: "#0a0908", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: 18, fontSize: 12, fontFamily: "monospace", color: "#d4f1b0", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", maxHeight: 300, overflowY: "auto" }}>
+          <div style={{ background: "#fdfbf7", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: 18, fontSize: 12, fontFamily: "monospace", color: C.text, overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", maxHeight: 300, overflowY: "auto" }}>
             {jsonStr}
           </div>
         </div>
@@ -1101,16 +724,10 @@ function StepResult({ result, onAddMore, onRestart }: { result: StepResult; onAd
   const cap = ctx.cap;
   const tipo = ctx.tipo || "";
   const tipoInfo = TIPOS.find(t => t.id === tipo);
-  const needsHtml = tipo === "estudio" || tipo === "exegesis";
 
   return (
     <div>
       <p style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: 2, color: C.gold, marginBottom: 14, fontFamily: "Georgia, serif" }}>Paso 4 — Resultado final</p>
-
-      {/* Vista previa de línea de tiempo para cronología */}
-      {tipo === "cronologia" && (
-        <TimelineDual libro={ctx.libro} slug={ctx.slug} cap={ctx.cap} />
-      )}
 
       {/* JSON */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 18, marginBottom: 14 }}>
@@ -1118,38 +735,18 @@ function StepResult({ result, onAddMore, onRestart }: { result: StepResult; onAd
           <span style={{ color: C.gold, fontWeight: "bold", fontSize: 14 }}>{tipoInfo?.icon} JSON generado — {tipoInfo?.label}</span>
           <CopyBtn text={jsonStr} />
         </div>
-        <div style={{ background: "#0a0908", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: 18, fontSize: 12, fontFamily: "monospace", color: "#d4f1b0", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", maxHeight: 380, overflowY: "auto" }}>{jsonStr}</div>
+        <div style={{ background: "#fdfbf7", border: `1px solid ${C.goldDim}`, borderRadius: 8, padding: 18, fontSize: 12, fontFamily: "monospace", color: C.text, overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all", maxHeight: 380, overflowY: "auto" }}>{jsonStr}</div>
       </div>
 
       {/* Instrucciones */}
-      <div style={{ background: "#0d1a12", border: `1px solid ${C.green}`, borderRadius: 8, padding: 18, marginTop: 14 }}>
-        <div style={{ color: "#5dd49a", fontSize: 13, fontWeight: "bold", marginBottom: 10 }}>📋 Instrucciones paso a paso</div>
+      <div style={{ background: "#e8f4f8", border: `1px solid ${C.accent}`, borderRadius: 8, padding: 18, marginTop: 14 }}>
+        <div style={{ color: C.accent, fontSize: 13, fontWeight: "bold", marginBottom: 10 }}>📋 Instrucciones paso a paso</div>
 
-        {needsHtml ? (
-          <>
-            <InstrStep n={1}>Creá el archivo HTML en: <PathBox>estudios/{slug}/cap-{cap}-{tipo}.html</PathBox></InstrStep>
-            <InstrStep n={2}>El archivo debe contener <strong>solo el contenido HTML interno</strong> (sin {"<html>"}, {"<head>"} ni {"<body>"}). Empezá directamente con las clases del sistema.</InstrStep>
-            <InstrStep n={3}>Abrí o creá el archivo: <PathBox>data/{slug}/cap-{cap}.json</PathBox></InstrStep>
-            <InstrStep n={4}>Dentro del array <code style={{ color: C.goldLight }}>"recursos": [...]</code>, pegá el JSON de arriba como un nuevo elemento.</InstrStep>
-            <InstrStep n={5}>Guardá ambos archivos y hacé <strong>commit + push</strong> al repositorio.</InstrStep>
-          </>
-        ) : (
-          <>
-            <InstrStep n={1}>Abrí el archivo: <PathBox>data/{slug}/cap-{cap}.json</PathBox></InstrStep>
-            <InstrStep n={2}>Dentro del array <code style={{ color: C.goldLight }}>"recursos": [...]</code>, pegá el JSON de arriba como un elemento nuevo. Verificá que las comas entre objetos sean correctas.</InstrStep>
-            {tipo === "video" && <InstrStep n={3}>⚠️ Recordá que el campo <code style={{ color: C.goldLight }}>"recurso_url"</code> debe tener <strong>solo el ID de YouTube</strong>.</InstrStep>}
-            {(tipo === "diapositiva" || tipo === "mapa") && <InstrStep n={3}>⚠️ Verificá que la URL sea la URL de <strong>embed</strong>.</InstrStep>}
-            {tipo === "cronologia" && (
-              <InstrStep n={3}>
-                ⏳ La línea de tiempo generada incluye:
-                <br />• <strong>linea_capitulo</strong>: eventos específicos del capítulo {cap}
-                <br />• <strong>linea_libro</strong>: panorama de todo el libro con el capítulo {cap} marcado
-                <br />• <strong>contenido_html</strong>: HTML visual con ambas líneas integradas
-              </InstrStep>
-            )}
-            <InstrStep n={4}>Guardá el archivo y hacé <strong>commit + push</strong> al repositorio.</InstrStep>
-          </>
-        )}
+        <InstrStep n={1}>Abrí el archivo: <PathBox>data/{slug}/cap-{cap}.json</PathBox></InstrStep>
+        <InstrStep n={2}>Dentro del array <code style={{ color: C.goldDim }}>"recursos": [...]</code>, pegá el JSON de arriba como un elemento nuevo. Verificá que las comas entre objetos sean correctas.</InstrStep>
+        {tipo === "video" && <InstrStep n={3}>⚠️ Recordá que el campo <code style={{ color: C.goldDim }}>"recurso_url"</code> debe tener <strong>solo el ID de YouTube</strong>.</InstrStep>}
+        {(tipo === "diapositiva" || tipo === "mapa") && <InstrStep n={3}>⚠️ Verificá que la URL sea la URL de <strong>embed</strong>.</InstrStep>}
+        <InstrStep n={4}>Guardá el archivo y hacé <strong>commit + push</strong> al repositorio.</InstrStep>
 
         {ctx.modo === "nuevo" && (
           <div style={{ marginTop: 14, borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
@@ -1163,11 +760,6 @@ function StepResult({ result, onAddMore, onRestart }: { result: StepResult; onAd
       {/* Checklist */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: 18, marginTop: 14 }}>
         <div style={{ color: C.gold, fontWeight: "bold", marginBottom: 10, fontSize: 13 }}>✅ Checklist de archivos</div>
-        {needsHtml && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 13 }}>
-            <span>🆕</span><PathBox>estudios/{slug}/cap-{cap}-{tipo}.html</PathBox><span style={{ color: C.muted }}>← crear / editar</span>
-          </div>
-        )}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 13 }}>
           <span>✏️</span><PathBox>data/{slug}/cap-{cap}.json</PathBox><span style={{ color: C.muted }}>← agregar recurso</span>
         </div>
@@ -1187,7 +779,7 @@ function StepResult({ result, onAddMore, onRestart }: { result: StepResult; onAd
         <button style={{ background: "transparent", color: C.muted, border: `1px solid ${C.border}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif" }} onClick={onAddMore}>
           ➕ Agregar otro recurso a {ctx.libro} {ctx.cap}
         </button>
-        <button style={{ background: `linear-gradient(135deg, ${C.goldDim}, #7a5210)`, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }} onClick={onRestart}>
+        <button style={{ background: C.azulOscuro, color: C.goldLight, border: `1px solid ${C.gold}`, borderRadius: 7, padding: "10px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Georgia, serif", fontWeight: "bold" }} onClick={onRestart}>
           🔄 Nuevo libro / capítulo
         </button>
       </div>
@@ -1206,11 +798,11 @@ export default function App() {
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Georgia', serif", color: C.text, display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div style={{ background: `linear-gradient(135deg, ${C.surface}, #2a2018)`, borderBottom: `1px solid ${C.border}`, padding: "18px 28px", display: "flex", alignItems: "center", gap: 14 }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.azulOscuro}, #2d4a6c)`, borderBottom: `1px solid ${C.border}`, padding: "18px 28px", display: "flex", alignItems: "center", gap: 14 }}>
         <span style={{ fontSize: 32 }}>📜</span>
         <div>
           <h1 style={{ fontSize: 20, color: C.gold, fontWeight: "bold", margin: 0, letterSpacing: 1 }}>Asistente de Recursos Bíblicos</h1>
-          <p style={{ fontSize: 12, color: C.muted, margin: "2px 0 0" }}>Mahanaim — Centro de Recursos Bíblicos</p>
+          <p style={{ fontSize: 12, color: "#e8d5a3", margin: "2px 0 0" }}>Mahanaim — Centro de Recursos Bíblicos</p>
         </div>
       </div>
 
@@ -1223,7 +815,7 @@ export default function App() {
               <div style={{
                 width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: "bold",
                 background: step > i + 1 ? C.gold : step === i + 1 ? C.goldDim : C.surface,
-                color: step >= i + 1 ? "#111" : C.muted,
+                color: step >= i + 1 ? "#fff" : C.muted,
                 border: `2px solid ${step > i + 1 ? C.gold : step === i + 1 ? C.goldLight : C.border}`,
                 transition: "all .3s",
               }}>
