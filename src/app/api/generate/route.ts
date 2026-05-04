@@ -29,9 +29,16 @@ export async function POST(req: Request) {
       data.choices?.[0]?.message?.content ||
       "No se recibió respuesta.";
 
-    return NextResponse.json({
+    // Respuesta con encabezados CORS para permitir solicitudes desde cualquier origen
+    return new NextResponse(JSON.stringify({
       success: true,
       text
+    }), {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
     });
 
   } catch (error) {
@@ -40,4 +47,15 @@ export async function POST(req: Request) {
       error: "Error al generar contenido"
     });
   }
+}
+
+// Manejo de solicitudes OPTIONS (CORS preflight)
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
 }
